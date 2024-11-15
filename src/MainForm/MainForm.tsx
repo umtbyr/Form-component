@@ -20,14 +20,7 @@ import FormComponent from "./components/FormComponent";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import {
-    Box,
-    Button,
-    Grid2,
-    TextField,
-    Typography,
-    Paper,
-} from "@mui/material";
+import { Box, Button, Grid, TextField, Typography, Paper } from "@mui/material";
 
 type ParamType = {
     param: number;
@@ -93,7 +86,9 @@ const MainForm: React.FC = () => {
     const {
         register,
         setValue,
+        clearErrors,
         handleSubmit,
+        trigger,
         formState: { errors },
     } = useForm<FormInputType>({
         resolver: yupResolver(schema),
@@ -104,7 +99,12 @@ const MainForm: React.FC = () => {
 
     useEffect(() => {
         setValue("consumer", consumerList);
-    }, [consumerList, setValue]);
+        if (consumerList.length > 0) {
+            clearErrors("consumer");
+        } else {
+            trigger("consumer");
+        }
+    }, [consumerList, setValue, trigger, clearErrors]);
 
     const onCloseFormHandler = () => {
         setActiveItem(null);
@@ -115,7 +115,6 @@ const MainForm: React.FC = () => {
         setRulesList((prevList) =>
             prevList.filter((item) => item.code !== activeItem.code)
         );
-        console.log(consumerList);
     };
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -151,18 +150,20 @@ const MainForm: React.FC = () => {
     };
 
     return (
-        <>
-            {formIsOpen && (
-                <FormComponent
-                    onSubmitHanlder={onSubmitFormHandler}
-                    onCloseHanlder={onCloseFormHandler}
-                    item={activeItem}
-                ></FormComponent>
-            )}
-            <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+        <Box
+            sx={{
+                border: "1px solid black",
+                borderRadius: "8px",
+            }}
+        >
+            <Box
+                sx={{ mx: 3, my: 5 }}
+                component="form"
+                onSubmit={handleSubmit(onSubmit)}
+            >
                 <Typography variant="h4" gutterBottom></Typography>
-                <Grid2 container spacing={3}>
-                    <Grid2>
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
                         <TextField
                             label="Title"
                             fullWidth
@@ -170,79 +171,102 @@ const MainForm: React.FC = () => {
                             error={!!errors.title}
                             helperText={errors.title?.message}
                         ></TextField>
-                    </Grid2>
-                    <label htmlFor="title">Title</label>
-                    <input {...register("title")} id="title" type="text" />
-                    {errors.title && (
-                        <p style={{ color: "red" }}>{errors.title.message}</p>
-                    )}
-                </Grid2>
-                <div>
-                    <label htmlFor="descr">Description</label>
-                    <textarea
-                        {...register("description")}
-                        id="descr"
-                    ></textarea>
-                    {errors.description && (
-                        <p style={{ color: "red" }}>
-                            {errors.description.message}
-                        </p>
-                    )}
-                </div>
-
+                    </Grid>
+                    <Grid item xs={12}>
+                        <TextField
+                            label="Description"
+                            fullWidth
+                            multiline
+                            rows={4}
+                            {...register("description")}
+                            error={!!errors.description}
+                            helperText={errors.description?.message}
+                        ></TextField>
+                    </Grid>
+                </Grid>
                 <DndContext
                     sensors={sensors}
                     onDragEnd={handleDragEnd}
                     onDragStart={handleDragStart}
                 >
-                    <div style={{ display: "flex", gap: "2rem" }}>
-                        <div
-                            style={{
-                                width: "300px",
-                                minHeight: "400px",
-                                padding: "8px",
-                                backgroundColor: "#f4f4f4",
-                                border: "1px solid #ddd",
-                            }}
-                        >
-                            <h3>Rules List</h3>
-                            {rulesList.map((item) => (
-                                <DraggableItem
-                                    key={item.code}
-                                    id={item.code}
-                                    label={item.text}
-                                />
-                            ))}
-                        </div>
-                        <DroppableList id="container">
-                            <SortableContext
-                                strategy={verticalListSortingStrategy}
-                                items={consumerList.map((item) => item.code)}
+                    <Grid container spacing={3} mt={3}>
+                        <Grid item xs={6}>
+                            <Paper
+                                elevation={3}
+                                sx={{
+                                    p: 2,
+                                }}
                             >
-                                {consumerList.map((item) => (
-                                    <SortableItem
+                                <Typography
+                                    sx={{ textAlign: "center" }}
+                                    variant="h6"
+                                >
+                                    Rule List
+                                </Typography>
+                                {rulesList.map((item) => (
+                                    <DraggableItem
                                         key={item.code}
                                         id={item.code}
                                         label={item.text}
-                                    ></SortableItem>
+                                    />
                                 ))}
-                                <input
-                                    type="hidden"
-                                    value={JSON.stringify(rulesList)}
-                                    {...register("consumer")}
-                                />
-                                {errors.consumer && (
-                                    <p style={{ color: "red" }}>
-                                        {errors.consumer.message}
-                                    </p>
-                                )}
-                            </SortableContext>
-                        </DroppableList>
-                    </div>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Paper elevation={3} sx={{ p: 2 }}>
+                                <DroppableList id="container">
+                                    <SortableContext
+                                        strategy={verticalListSortingStrategy}
+                                        items={consumerList.map(
+                                            (item) => item.code
+                                        )}
+                                    >
+                                        {consumerList.map((item) => (
+                                            <SortableItem
+                                                key={item.code}
+                                                id={item.code}
+                                                label={item.text}
+                                            ></SortableItem>
+                                        ))}
+
+                                        <input
+                                            type="hidden"
+                                            value={JSON.stringify(rulesList)}
+                                            {...register("consumer")}
+                                        />
+
+                                        {errors.consumer && (
+                                            <p style={{ color: "red" }}>
+                                                {errors.consumer.message}
+                                            </p>
+                                        )}
+                                    </SortableContext>
+                                </DroppableList>
+                            </Paper>
+                        </Grid>
+                    </Grid>
                 </DndContext>
-                <button>submit</button>
+                <Box
+                    sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}
+                >
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        sx={{ mb: 5, width: "30%" }}
+                    >
+                        submit
+                    </Button>
+                </Box>
             </Box>
-        </>
+            {formIsOpen && (
+                <FormComponent
+                    onSubmitHanlder={onSubmitFormHandler}
+                    onCloseHanlder={onCloseFormHandler}
+                    item={activeItem}
+                ></FormComponent>
+            )}
+        </Box>
     );
 };
 

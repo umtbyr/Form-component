@@ -3,7 +3,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { countSquareBrackets } from "../utlis";
 import * as yup from "yup";
-
+import { Box, Grid, TextField, Typography, Paper, Button } from "@mui/material";
 type Props = {
     item: ItemType | undefined | null;
     onCloseHanlder: () => void;
@@ -68,50 +68,56 @@ const FormComponent: React.FC<Props> = ({
             <div style={styles.overlay} onClick={onCloseHanlder}></div>
 
             <div style={styles.modal}>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <p>{item.text}</p>
-                    <div style={styles.inputContainer}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                    }}
+                    component="form"
+                    onSubmit={handleSubmit(onSubmit)}
+                >
+                    <Typography variant="h6">{item.text}</Typography>
+                    <Box sx={{ display: "flex", p: 2 }}>
                         {Inputs.map((name) => (
-                            <div key={name}>
-                                <input
-                                    style={styles.input}
-                                    {...register(name)}
-                                    type="number"
-                                    placeholder={name}
-                                ></input>
-                                {errors[name] && (
-                                    <p style={styles.error}>
-                                        {errors[name]?.message}
-                                    </p>
-                                )}
-                            </div>
+                            <TextField
+                                sx={{ mx: 1 }}
+                                key={name}
+                                fullWidth
+                                {...register(name)}
+                                type="number"
+                                placeholder={name}
+                                error={!!errors}
+                                helperText={errors[name]?.message}
+                            ></TextField>
                         ))}
-                    </div>
-                    <div style={styles.buttonContainer}>
-                        <button type="submit">Submit</button>
-                        <button type="button" onClick={onCloseHanlder}>
+                    </Box>
+                    <Box
+                        sx={{
+                            px: 1,
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <Button variant="contained" type="submit">
+                            Submit
+                        </Button>
+                        <Button
+                            variant="contained"
+                            type="button"
+                            onClick={onCloseHanlder}
+                        >
                             Cancel
-                        </button>
-                    </div>
-                </form>
+                        </Button>
+                    </Box>
+                </Box>
             </div>
         </>
     );
 };
 
 const styles = {
-    inputContainer: {
-        display: "flex",
-        backgrounColor: "red",
-        padding: " 0 2rem",
-    },
-
-    input: {
-        minWidth: "100px",
-        minHeight: "40px",
-        margin: "1rem",
-    },
-
     overlay: {
         position: "fixed" as "fixed",
         top: 0,
@@ -131,19 +137,10 @@ const styles = {
         borderRadius: "8px",
         boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
         zIndex: 1001,
-        minWidth: "300px",
+        minWidth: "400px",
         maxWidth: "80%",
         maxHeight: "80%",
         overflowY: "auto" as "auto",
-    },
-    error: {
-        color: "red",
-        fontSize: "12px",
-    },
-    buttonContainer: {
-        display: "flex",
-        justifyContent: "space-between",
-        marginTop: "15px",
     },
 };
 

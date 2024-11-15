@@ -1,4 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
+import { Box } from "@mui/material";
 
 type Props = {
     id: string;
@@ -11,17 +12,9 @@ const DroppableList: React.FC<Props> = ({ id, children }) => {
     });
 
     return (
-        <div
-            style={{
-                width: "300px",
-                padding: "8px",
-                backgroundColor: "#f4f4f4",
-                border: "1px solid #ddd",
-            }}
-            ref={setNodeRef}
-        >
+        <Box sx={{ minHeight: "300px" }} ref={setNodeRef}>
             {children}
-        </div>
+        </Box>
     );
 };
 
