@@ -3,11 +3,25 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { countSquareBrackets } from "../utlis";
 import * as yup from "yup";
-import { Box, Grid, TextField, Typography, Paper, Button } from "@mui/material";
+import {
+    Box,
+    TextField,
+    Typography,
+    Button,
+    Dialog,
+    DialogTitle,
+    IconButton,
+    DialogContent,
+    DialogActions,
+} from "@mui/material";
+import { Close } from "@mui/icons-material";
+import { itemsEqual } from "@dnd-kit/sortable/dist/utilities";
 type Props = {
     item: ItemType | undefined | null;
     onCloseHanlder: () => void;
-    onSubmitHanlder: (item: ItemType) => void;
+    onSubmitHanlder: (item: ItemType, paramsArray: ParamType[]) => void;
+    open: boolean;
+    isEditing?: boolean;
 };
 
 type ParamType = {
@@ -29,6 +43,8 @@ const FormComponent: React.FC<Props> = ({
     item,
     onCloseHanlder,
     onSubmitHanlder,
+    open,
+    isEditing,
 }) => {
     if (!item || !item.text) {
         return <p>No items avaliable</p>;
@@ -39,6 +55,7 @@ const FormComponent: React.FC<Props> = ({
         { length: paramsLength },
         (_, index) => `input${index + 1}`
     );
+
     const schema = yup.object().shape(
         Inputs.reduce((acc, inputName) => {
             acc[inputName] = yup
@@ -57,91 +74,95 @@ const FormComponent: React.FC<Props> = ({
         resolver: yupResolver(schema),
     });
 
-    const onSubmit: SubmitHandler<InputFields> = (data) => {
-        console.log(data);
-        onSubmitHanlder(item);
+    const onSubmit: SubmitHandler<InputFields> = (inputs) => {
+        const paramsArray = Object.values(inputs).map((input, index) => {
+            return {
+                param: input,
+                order: index,
+            } as ParamType;
+        });
+
+        onSubmitHanlder(item, paramsArray);
         onCloseHanlder();
     };
 
     return (
         <>
-            <div style={styles.overlay} onClick={onCloseHanlder}></div>
-
-            <div style={styles.modal}>
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                    }}
-                    component="form"
-                    onSubmit={handleSubmit(onSubmit)}
+            <Dialog open={open}>
+                <DialogTitle sx={{ m: 0, p: 2 }}>Edit Rule</DialogTitle>
+                <IconButton
+                    onClick={onCloseHanlder}
+                    aria-label="close"
+                    sx={(theme) => ({
+                        position: "absolute",
+                        right: 8,
+                        top: 8,
+                        color: theme.palette.grey[500],
+                    })}
                 >
-                    <Typography variant="h6">{item.text}</Typography>
-                    <Box sx={{ display: "flex", p: 2 }}>
-                        {Inputs.map((name) => (
-                            <TextField
-                                sx={{ mx: 1 }}
-                                key={name}
-                                fullWidth
-                                {...register(name)}
-                                type="number"
-                                placeholder={name}
-                                error={!!errors}
-                                helperText={errors[name]?.message}
-                            ></TextField>
-                        ))}
-                    </Box>
+                    <Close />
+                </IconButton>
+                <DialogContent dividers sx={{ p: 5 }}>
                     <Box
                         sx={{
-                            px: 1,
-                            width: "100%",
                             display: "flex",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
+                            alignItems: "center",
                         }}
+                        component="form"
+                        onSubmit={handleSubmit(onSubmit)}
                     >
-                        <Button variant="contained" type="submit">
-                            Submit
-                        </Button>
-                        <Button
-                            variant="contained"
-                            type="button"
-                            onClick={onCloseHanlder}
+                        <Typography
+                            component="p"
+                            sx={{ mb: 2, fontSize: "1.2rem" }}
                         >
-                            Cancel
-                        </Button>
+                            {item.text}
+                        </Typography>
+                        <Box sx={{ display: "flex", gap: 3 }}>
+                            {Inputs.map((name, index) => (
+                                <TextField
+                                    key={name}
+                                    fullWidth
+                                    {...register(name)}
+                                    type="number"
+                                    placeholder={
+                                        item.params?.[
+                                            index
+                                        ]?.param?.toString() || name
+                                    }
+                                    error={!!errors[name]}
+                                    helperText={errors[name]?.message}
+                                ></TextField>
+                            ))}
+                        </Box>
                     </Box>
-                </Box>
-            </div>
+                </DialogContent>
+                <DialogActions
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        px: 3,
+                        my: 2,
+                    }}
+                >
+                    <Button
+                        variant="contained"
+                        type="submit"
+                        onClick={handleSubmit(onSubmit)}
+                    >
+                        {isEditing ? "Edit" : "Submit"}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        type="button"
+                        onClick={onCloseHanlder}
+                    >
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
-};
-
-const styles = {
-    overlay: {
-        position: "fixed" as "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        zIndex: 1000,
-    },
-    modal: {
-        position: "fixed" as "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        backgroundColor: "white",
-        padding: "20px",
-        borderRadius: "8px",
-        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.5)",
-        zIndex: 1001,
-        minWidth: "400px",
-        maxWidth: "80%",
-        maxHeight: "80%",
-        overflowY: "auto" as "auto",
-    },
 };
 
 export default FormComponent;

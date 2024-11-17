@@ -1,14 +1,30 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Box, Grid, TextField, Typography, Paper, Button } from "@mui/material";
-
+import {
+    Box,
+    Grid,
+    TextField,
+    Typography,
+    Paper,
+    Button,
+    IconButton,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SettingsIcon from "@mui/icons-material/Settings";
 type SortableItemProps = {
     id: string;
     label: string;
+    onDelete: (code: string) => void;
+    onEdit: (code: string) => void;
 };
 
-const SortableItem: React.FC<SortableItemProps> = ({ id, label }) => {
+const SortableItem: React.FC<SortableItemProps> = ({
+    id,
+    label,
+    onDelete,
+    onEdit,
+}) => {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({ id });
 
@@ -17,18 +33,41 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, label }) => {
         transition,
         margin: "4px",
         padding: "8px",
-        border: "1px solid #ddd",
+
         borderRadius: "4px",
-        backgroundColor: "#e3f2fd",
         cursor: "grab",
         width: "100%",
         boxSizing: "border-box",
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            {label}
-        </div>
+        <Box
+            style={style}
+            ref={setNodeRef}
+            {...attributes}
+            sx={{
+                px: 1,
+                display: "flex",
+                gap: 1,
+                alignItems: "center",
+                height: "100px",
+                justifyContent: "center",
+            }}
+        >
+            <Typography {...listeners} component="p" sx={{ flex: 1 }}>
+                {label}
+            </Typography>
+            <IconButton
+                onClick={() => {
+                    onDelete(id);
+                }}
+            >
+                <DeleteIcon sx={{ color: "red" }} />
+            </IconButton>
+            <IconButton onClick={() => onEdit(id)}>
+                <SettingsIcon />
+            </IconButton>
+        </Box>
     );
 };
 

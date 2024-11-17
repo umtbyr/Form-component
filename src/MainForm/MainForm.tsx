@@ -56,6 +56,7 @@ const MainForm: React.FC = () => {
     ]);
 
     const [formIsOpen, setFormIsOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
     const [activeItem, setActiveItem] = useState<ItemType | null>();
     const [consumerList, setConsumerList] = useState<ItemType[]>([]);
 
@@ -79,7 +80,7 @@ const MainForm: React.FC = () => {
                     code: yup.string().required(),
                 })
             )
-            .min(1, "Rules can not be empty")
+            .min(1, "Drag and drop a rule from the rule list.")
             .default([]),
     });
 
@@ -109,12 +110,37 @@ const MainForm: React.FC = () => {
     const onCloseFormHandler = () => {
         setActiveItem(null);
         setFormIsOpen(false);
+        if (isEditing) {
+            toggleIsEditing();
+        }
     };
-    const onSubmitFormHandler = (activeItem: ItemType) => {
-        setConsumerList((prevList) => [...prevList, activeItem]);
-        setRulesList((prevList) =>
-            prevList.filter((item) => item.code !== activeItem.code)
-        );
+    const onSubmitFormHandler = (
+        activeItem: ItemType,
+        paramsArray: ParamType[]
+    ) => {
+        if (isEditing) {
+            toggleIsEditing();
+        }
+        setActiveItem((prev) => {
+            if (!prev) {
+                return null;
+            }
+            const updatedActiveItem = {
+                ...prev,
+                params: paramsArray as ParamType[],
+            };
+            setConsumerList((prev) => {
+                const updatedConsumerArray = prev.filter(
+                    (item) => item.code !== activeItem.code
+                );
+                return [...updatedConsumerArray, updatedActiveItem];
+            });
+            if (!isEditing) {
+                setRulesList((prevList) =>
+                    prevList.filter((item) => item.code !== activeItem.code)
+                );
+            }
+        });
     };
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -129,7 +155,7 @@ const MainForm: React.FC = () => {
             }
         }
         if (itemToSort) {
-            console.log(over?.id);
+            console.log(over?.id + " from drag end func");
 
             const oldIndex = consumerList.findIndex(
                 (item) => item.code === active.id
@@ -143,6 +169,20 @@ const MainForm: React.FC = () => {
                 );
             }
         }
+    };
+
+    const sortableItemDelete = (code: string) => {
+        setConsumerList((prev) => prev.filter((item) => item.code !== code));
+    };
+    const sortableItemEdit = (code: string) => {
+        const itemToEdit = consumerList.find((item) => item.code === code);
+        setIsEditing(true);
+        setActiveItem(itemToEdit);
+        setFormIsOpen(true);
+    };
+
+    const toggleIsEditing = () => {
+        setIsEditing((prev) => !prev);
     };
 
     const onSubmit: SubmitHandler<FormInputType> = (data) => {
@@ -223,6 +263,8 @@ const MainForm: React.FC = () => {
                                     >
                                         {consumerList.map((item) => (
                                             <SortableItem
+                                                onEdit={sortableItemEdit}
+                                                onDelete={sortableItemDelete}
                                                 key={item.code}
                                                 id={item.code}
                                                 label={item.text}
@@ -236,9 +278,15 @@ const MainForm: React.FC = () => {
                                         />
 
                                         {errors.consumer && (
-                                            <p style={{ color: "red" }}>
+                                            <Typography
+                                                sx={{
+                                                    mt: 2,
+                                                    color: "red",
+                                                    textAlign: "center",
+                                                }}
+                                            >
                                                 {errors.consumer.message}
-                                            </p>
+                                            </Typography>
                                         )}
                                     </SortableContext>
                                 </DroppableList>
@@ -261,6 +309,8 @@ const MainForm: React.FC = () => {
             </Box>
             {formIsOpen && (
                 <FormComponent
+                    isEditing={isEditing}
+                    open={formIsOpen}
                     onSubmitHanlder={onSubmitFormHandler}
                     onCloseHanlder={onCloseFormHandler}
                     item={activeItem}

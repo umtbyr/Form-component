@@ -1,5 +1,6 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
+import { Box, Typography } from "@mui/material";
 type Props = {
     id: string;
     label: string;
@@ -25,9 +26,9 @@ const DraggableItem: React.FC<Props> = ({ id, label }) => {
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            {label}
-        </div>
+        <Box ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <Typography component="p">{label}</Typography>
+        </Box>
     );
 };
 
