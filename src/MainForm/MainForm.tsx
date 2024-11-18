@@ -12,7 +12,10 @@ import { createContext } from "react";
 import { mainFormContextType } from "./types";
 import DndProvider from "./components/DndProvider";
 
+//form context
 const mainFormContext = createContext<mainFormContextType | null>(null);
+
+//custom hook that checks context is not null.
 export const useMainFormContext = () => {
     const context = useContext(mainFormContext);
     if (!context) {
@@ -57,6 +60,8 @@ const MainForm: React.FC = () => {
         setIsEditing,
         setConsumerList,
     };
+
+    //valiadation shecma that uses yup library.
     const schema = yup.object().shape({
         title: yup.string().required("Title is required"),
         description: yup.string().required("Description is required"),
@@ -72,6 +77,7 @@ const MainForm: React.FC = () => {
             .default([]),
     });
 
+    //form react hook
     const {
         register,
         setValue,
@@ -85,7 +91,7 @@ const MainForm: React.FC = () => {
             consumer: consumerList,
         },
     });
-
+    //since we programatically change the value of the consumerList, we should check the error state of it and trigger if there is any.
     useEffect(() => {
         setValue("consumer", consumerList);
         if (consumerList.length > 0) {
@@ -95,55 +101,49 @@ const MainForm: React.FC = () => {
         }
     }, [consumerList, setValue, trigger, clearErrors]);
 
+    //dialog close handler which we pass to dialog via props.
     const onCloseFormHandler = () => {
+        //clears the active item.
         setActiveItem(null);
         setFormIsOpen(false);
+        //if dialog opens for any editing purposes set the editing state to false.
         if (isEditing) {
-            toggleIsEditing();
+            setIsEditing(false);
         }
     };
-    const onSubmitFormHandler = (
+    //dialog submit or edit handler which we pass to dialog via props.
+    const onSubmitOrEditFormHandler = (
         activeItem: ItemType,
         paramsArray: ParamType[]
     ) => {
-        if (isEditing) {
-            toggleIsEditing();
-        }
         setActiveItem((prev) => {
+            //null check for active item.
             if (!prev) {
                 return null;
             }
+            //create an Item object with proper params that we get from the arguments of the func.
             const updatedActiveItem = {
                 ...prev,
                 params: paramsArray as ParamType[],
             };
-            setConsumerList((prev) => {
-                const updatedConsumerArray = prev.filter(
-                    (item) => item.code !== activeItem.code
-                );
-                return [...updatedConsumerArray, updatedActiveItem];
-            });
-            if (!isEditing) {
+            //we have two possible cases. one if we editing an item, in that case we should get rid of the old item first.
+            if (isEditing) {
+                setConsumerList((prev) => {
+                    const updatedConsumerArray = prev.filter(
+                        (item) => item.code !== activeItem.code
+                    );
+                    return [updatedActiveItem, ...updatedConsumerArray];
+                });
+            } else {
+                //in the second case we don't need to delete any item from consumerList but we should delete the item we dragged from the sourceList(rulesList).
+                setConsumerList((prev) => [updatedActiveItem, ...prev]);
                 setRulesList((prevList) =>
                     prevList.filter((item) => item.code !== activeItem.code)
                 );
             }
         });
     };
-    const sortableItemDelete = (code: string) => {
-        setConsumerList((prev) => prev.filter((item) => item.code !== code));
-    };
-    const sortableItemEdit = (code: string) => {
-        const itemToEdit = consumerList.find((item) => item.code === code);
-        setIsEditing(true);
-        setActiveItem(itemToEdit);
-        setFormIsOpen(true);
-    };
-
-    const toggleIsEditing = () => {
-        setIsEditing((prev) => !prev);
-    };
-
+    //sumbit handler for main item it logs the form data for demo purpose.
     const onSubmit: SubmitHandler<FormInputType> = (data) => {
         console.log(data);
     };
@@ -165,16 +165,11 @@ const MainForm: React.FC = () => {
                         register={register}
                         errors={errors}
                     />
+
                     <DndProvider>
                         <Grid container spacing={3} mt={3}>
                             <SourceList sourceList={rulesList} />
-                            <ConsumerList
-                                consumerList={consumerList}
-                                register={register}
-                                errors={errors}
-                                sortableItemDelete={sortableItemDelete}
-                                sortableItemEdit={sortableItemEdit}
-                            />
+                            <ConsumerList register={register} errors={errors} />
                         </Grid>
                     </DndProvider>
                     <Box
@@ -198,7 +193,7 @@ const MainForm: React.FC = () => {
                     <DialogComponent
                         isEditing={isEditing}
                         open={formIsOpen}
-                        onSubmitHanlder={onSubmitFormHandler}
+                        onSubmitOrEditHanlder={onSubmitOrEditFormHandler}
                         onCloseHanlder={onCloseFormHandler}
                         item={activeItem}
                     ></DialogComponent>

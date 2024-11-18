@@ -19,7 +19,7 @@ import { Close } from "@mui/icons-material";
 type Props = {
     item: ItemType | undefined | null;
     onCloseHanlder: () => void;
-    onSubmitHanlder: (item: ItemType, paramsArray: ParamType[]) => void;
+    onSubmitOrEditHanlder: (item: ItemType, paramsArray: ParamType[]) => void;
     open: boolean;
     isEditing?: boolean;
 };
@@ -27,20 +27,24 @@ type Props = {
 const DialogComponent: React.FC<Props> = ({
     item,
     onCloseHanlder,
-    onSubmitHanlder,
+    onSubmitOrEditHanlder,
     open,
     isEditing,
 }) => {
+    //null check for item.
     if (!item || !item.text) {
         return <p>No items avaliable</p>;
     }
-
+    //since we should create inputFields dynamically first we need to determine how many [] do we have in the string.
     const paramsLength = countSquareBrackets(item.text);
+    //creates an Inputs array with dynamic items. Later we will use these input names to create dynamic TextFieleds.
+    //then we will give these input names to that Textfields to register them to react-hook-form also we'll use these names to create validation shcema.
     const Inputs = Array.from(
         { length: paramsLength },
         (_, index) => `input${index + 1}`
     );
-
+    //dynamically creating the schema and we use .reduce function on Inputs array to create schema value of the schema will be the same since
+    //they all are number. but keys will be dynamic. acc[inputName]
     const schema = yup.object().shape(
         Inputs.reduce((acc, inputName) => {
             acc[inputName] = yup
@@ -61,6 +65,8 @@ const DialogComponent: React.FC<Props> = ({
     });
 
     const onSubmit: SubmitHandler<InputFields> = (inputs) => {
+        //create the paramsArray from the given form data. Object.values return an array form given object. then we map over that array and create
+        //param object and put them in an array.
         const paramsArray = Object.values(inputs).map((input, index) => {
             return {
                 param: input,
@@ -68,7 +74,7 @@ const DialogComponent: React.FC<Props> = ({
             } as ParamType;
         });
 
-        onSubmitHanlder(item, paramsArray.reverse());
+        onSubmitOrEditHanlder(item, paramsArray.reverse());
         onCloseHanlder();
     };
 

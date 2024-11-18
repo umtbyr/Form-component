@@ -15,9 +15,8 @@ const DraggableItem: React.FC<Props> = ({ id, label }) => {
             ? `translate(${transform.x}px, ${transform.y}px)`
             : undefined,
         transition: "none",
-        margin: "4px",
+        margin: "8px",
         padding: "8px",
-        border: "1px solid #ddd",
         borderRadius: "4px",
         backgroundColor: "#fff",
         cursor: "pointer",
@@ -26,7 +25,13 @@ const DraggableItem: React.FC<Props> = ({ id, label }) => {
     };
 
     return (
-        <Box ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <Box
+            sx={{ border: "0.5px solid black" }}
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+        >
             <Typography component="p">{label}</Typography>
         </Box>
     );

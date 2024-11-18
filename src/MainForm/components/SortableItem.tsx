@@ -23,9 +23,6 @@ const SortableItem: React.FC<SortableItemProps> = ({
     const style: React.CSSProperties = {
         transform: transform ? CSS.Transform.toString(transform) : undefined,
         transition,
-        margin: "4px",
-        padding: "8px",
-
         borderRadius: "4px",
         cursor: "grab",
         width: "100%",
@@ -38,7 +35,10 @@ const SortableItem: React.FC<SortableItemProps> = ({
             ref={setNodeRef}
             {...attributes}
             sx={{
+                border: "0.5px solid black",
+                py: 2,
                 px: 1,
+                m: 1,
                 display: "flex",
                 gap: 1,
                 alignItems: "center",

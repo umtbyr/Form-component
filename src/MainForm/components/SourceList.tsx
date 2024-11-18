@@ -1,4 +1,4 @@
-import { Grid, Paper, Typography } from "@mui/material";
+import { Box, Grid, Paper, Typography } from "@mui/material";
 import { ItemType } from "../types";
 import DraggableItem from "./DraggableItem";
 
@@ -18,13 +18,22 @@ const SourceList: React.FC<Props> = ({ sourceList }) => {
                 <Typography sx={{ textAlign: "center" }} variant="h6">
                     Rule List
                 </Typography>
-                {sourceList.map((item) => (
-                    <DraggableItem
-                        key={item.code}
-                        id={item.code}
-                        label={item.text}
-                    />
-                ))}
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        py:2
+                    }}
+                >
+                    {sourceList.map((item) => (
+                        <DraggableItem
+                            key={item.code}
+                            id={item.code}
+                            label={item.text}
+                        />
+                    ))}
+                </Box>
             </Paper>
         </Grid>
     );
