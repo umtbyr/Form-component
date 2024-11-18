@@ -24,7 +24,7 @@ type Props = {
     isEditing?: boolean;
 };
 
-const FormComponent: React.FC<Props> = ({
+const DialogComponent: React.FC<Props> = ({
     item,
     onCloseHanlder,
     onSubmitHanlder,
@@ -68,7 +68,7 @@ const FormComponent: React.FC<Props> = ({
             } as ParamType;
         });
 
-        onSubmitHanlder(item, paramsArray);
+        onSubmitHanlder(item, paramsArray.reverse());
         onCloseHanlder();
     };
 
@@ -151,4 +151,4 @@ const FormComponent: React.FC<Props> = ({
     );
 };
 
-export default FormComponent;
+export default DialogComponent;

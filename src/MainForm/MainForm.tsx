@@ -1,16 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
-import FormComponent from "./components/FormComponent";
+import DialogComponent from "./components/DialogComponent";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Box, Button, Grid } from "@mui/material";
 import TİtleAndDescriptionFields from "./components/TitleAndDescriptionFields";
-import SoureList from "./components/SourceList";
+import SourceList from "./components/SourceList";
 import ConsumerList from "./components/ConsumerList";
 import { FormInputType, ItemType, ParamType } from "./types";
 import { createContext } from "react";
 import { mainFormContextType } from "./types";
-import DndProvider from "./components/dndProvider";
+import DndProvider from "./components/DndProvider";
 
 const mainFormContext = createContext<mainFormContextType | null>(null);
 export const useMainFormContext = () => {
@@ -167,7 +167,7 @@ const MainForm: React.FC = () => {
                     />
                     <DndProvider>
                         <Grid container spacing={3} mt={3}>
-                            <SoureList sourceList={rulesList} />
+                            <SourceList sourceList={rulesList} />
                             <ConsumerList
                                 consumerList={consumerList}
                                 register={register}
@@ -195,13 +195,13 @@ const MainForm: React.FC = () => {
                     </Box>
                 </Box>
                 {formIsOpen && (
-                    <FormComponent
+                    <DialogComponent
                         isEditing={isEditing}
                         open={formIsOpen}
                         onSubmitHanlder={onSubmitFormHandler}
                         onCloseHanlder={onCloseFormHandler}
                         item={activeItem}
-                    ></FormComponent>
+                    ></DialogComponent>
                 )}
             </Box>
         </mainFormContext.Provider>

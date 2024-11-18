@@ -6,7 +6,7 @@ type Props = {
     sourceList: ItemType[];
 };
 
-const SoureList: React.FC<Props> = ({ sourceList }) => {
+const SourceList: React.FC<Props> = ({ sourceList }) => {
     return (
         <Grid item xs={6}>
             <Paper
@@ -30,4 +30,4 @@ const SoureList: React.FC<Props> = ({ sourceList }) => {
     );
 };
 
-export default SoureList;
+export default SourceList;
