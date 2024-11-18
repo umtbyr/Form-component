@@ -1,42 +1,25 @@
-import React, { useEffect, useState } from "react";
-import DroppableList from "./components/DroppableList";
-import {
-    DndContext,
-    useSensor,
-    useSensors,
-    MouseSensor,
-    TouchSensor,
-    DragEndEvent,
-    DragStartEvent,
-} from "@dnd-kit/core";
-import {
-    SortableContext,
-    arrayMove,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import DraggableItem from "./components/DraggableItem";
-import SortableItem from "./components/SortableItem";
+import React, { useContext, useEffect, useState } from "react";
 import FormComponent from "./components/FormComponent";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { Box, Button, Grid, TextField, Typography, Paper } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
+import TİtleAndDescriptionFields from "./components/TitleAndDescriptionFields";
+import SoureList from "./components/SourceList";
+import ConsumerList from "./components/ConsumerList";
+import { FormInputType, ItemType, ParamType } from "./types";
+import { createContext } from "react";
+import { mainFormContextType } from "./types";
+import DndProvider from "./components/dndProvider";
 
-type ParamType = {
-    param: number;
-    order: number;
-};
-
-type ItemType = {
-    text: string;
-    code: string;
-    params?: ParamType[];
-};
-
-type FormInputType = {
-    title: string;
-    description: string;
-    consumer: ItemType[];
+const mainFormContext = createContext<mainFormContextType | null>(null);
+export const useMainFormContext = () => {
+    const context = useContext(mainFormContext);
+    if (!context) {
+        throw new Error("context value can not be null!");
+    } else {
+        return context;
+    }
 };
 
 const MainForm: React.FC = () => {
@@ -57,17 +40,22 @@ const MainForm: React.FC = () => {
 
     const [formIsOpen, setFormIsOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [activeItem, setActiveItem] = useState<ItemType | null>();
+    const [activeItem, setActiveItem] = useState<ItemType | null | undefined>(
+        null
+    );
     const [consumerList, setConsumerList] = useState<ItemType[]>([]);
 
-    const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
-    const handleDragStart = (event: DragStartEvent) => {
-        const { active } = event;
-
-        const activeListItem = rulesList.find(
-            (item) => item.code === active.id
-        );
-        setActiveItem(activeListItem);
+    const mainCtxValue: mainFormContextType = {
+        rulesList,
+        setRulesList,
+        activeItem,
+        setActiveItem,
+        formIsOpen,
+        setFormIsOpen,
+        consumerList,
+        isEditing,
+        setIsEditing,
+        setConsumerList,
     };
     const schema = yup.object().shape({
         title: yup.string().required("Title is required"),
@@ -142,35 +130,6 @@ const MainForm: React.FC = () => {
             }
         });
     };
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-
-        const itemToMove = rulesList.find((item) => item.code === active.id);
-        const itemToSort = consumerList.find((item) => item.code === active.id);
-        if (over?.id === "container") {
-            if (itemToMove) {
-                setFormIsOpen(true);
-
-                return;
-            }
-        }
-        if (itemToSort) {
-            console.log(over?.id + " from drag end func");
-
-            const oldIndex = consumerList.findIndex(
-                (item) => item.code === active.id
-            );
-            const newIndex = consumerList.findIndex(
-                (item) => item.code === over?.id
-            );
-            if (oldIndex !== newIndex) {
-                setConsumerList((prevList) =>
-                    arrayMove(prevList, oldIndex, newIndex)
-                );
-            }
-        }
-    };
-
     const sortableItemDelete = (code: string) => {
         setConsumerList((prev) => prev.filter((item) => item.code !== code));
     };
@@ -190,133 +149,62 @@ const MainForm: React.FC = () => {
     };
 
     return (
-        <Box
-            sx={{
-                border: "1px solid black",
-                borderRadius: "8px",
-            }}
-        >
+        <mainFormContext.Provider value={mainCtxValue}>
             <Box
-                sx={{ mx: 3, my: 5 }}
-                component="form"
-                onSubmit={handleSubmit(onSubmit)}
+                sx={{
+                    border: "1px solid black",
+                    borderRadius: "8px",
+                }}
             >
-                <Typography variant="h4" gutterBottom></Typography>
-                <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                        <TextField
-                            label="Title"
-                            fullWidth
-                            {...register("title")}
-                            error={!!errors.title}
-                            helperText={errors.title?.message}
-                        ></TextField>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <TextField
-                            label="Description"
-                            fullWidth
-                            multiline
-                            rows={4}
-                            {...register("description")}
-                            error={!!errors.description}
-                            helperText={errors.description?.message}
-                        ></TextField>
-                    </Grid>
-                </Grid>
-                <DndContext
-                    sensors={sensors}
-                    onDragEnd={handleDragEnd}
-                    onDragStart={handleDragStart}
-                >
-                    <Grid container spacing={3} mt={3}>
-                        <Grid item xs={6}>
-                            <Paper
-                                elevation={3}
-                                sx={{
-                                    p: 2,
-                                }}
-                            >
-                                <Typography
-                                    sx={{ textAlign: "center" }}
-                                    variant="h6"
-                                >
-                                    Rule List
-                                </Typography>
-                                {rulesList.map((item) => (
-                                    <DraggableItem
-                                        key={item.code}
-                                        id={item.code}
-                                        label={item.text}
-                                    />
-                                ))}
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={6}>
-                            <Paper elevation={3} sx={{ p: 2 }}>
-                                <DroppableList id="container">
-                                    <SortableContext
-                                        strategy={verticalListSortingStrategy}
-                                        items={consumerList.map(
-                                            (item) => item.code
-                                        )}
-                                    >
-                                        {consumerList.map((item) => (
-                                            <SortableItem
-                                                onEdit={sortableItemEdit}
-                                                onDelete={sortableItemDelete}
-                                                key={item.code}
-                                                id={item.code}
-                                                label={item.text}
-                                            ></SortableItem>
-                                        ))}
-
-                                        <input
-                                            type="hidden"
-                                            value={JSON.stringify(rulesList)}
-                                            {...register("consumer")}
-                                        />
-
-                                        {errors.consumer && (
-                                            <Typography
-                                                sx={{
-                                                    mt: 2,
-                                                    color: "red",
-                                                    textAlign: "center",
-                                                }}
-                                            >
-                                                {errors.consumer.message}
-                                            </Typography>
-                                        )}
-                                    </SortableContext>
-                                </DroppableList>
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                </DndContext>
                 <Box
-                    sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}
+                    sx={{ mx: 3, my: 5 }}
+                    component="form"
+                    onSubmit={handleSubmit(onSubmit)}
                 >
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        sx={{ mb: 5, width: "30%" }}
+                    <TİtleAndDescriptionFields
+                        register={register}
+                        errors={errors}
+                    />
+                    <DndProvider>
+                        <Grid container spacing={3} mt={3}>
+                            <SoureList sourceList={rulesList} />
+                            <ConsumerList
+                                consumerList={consumerList}
+                                register={register}
+                                errors={errors}
+                                sortableItemDelete={sortableItemDelete}
+                                sortableItemEdit={sortableItemEdit}
+                            />
+                        </Grid>
+                    </DndProvider>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            mt: 3,
+                        }}
                     >
-                        submit
-                    </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            sx={{ mb: 5, width: "30%" }}
+                        >
+                            submit
+                        </Button>
+                    </Box>
                 </Box>
+                {formIsOpen && (
+                    <FormComponent
+                        isEditing={isEditing}
+                        open={formIsOpen}
+                        onSubmitHanlder={onSubmitFormHandler}
+                        onCloseHanlder={onCloseFormHandler}
+                        item={activeItem}
+                    ></FormComponent>
+                )}
             </Box>
-            {formIsOpen && (
-                <FormComponent
-                    isEditing={isEditing}
-                    open={formIsOpen}
-                    onSubmitHanlder={onSubmitFormHandler}
-                    onCloseHanlder={onCloseFormHandler}
-                    item={activeItem}
-                ></FormComponent>
-            )}
-        </Box>
+        </mainFormContext.Provider>
     );
 };
 

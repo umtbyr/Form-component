@@ -2,6 +2,7 @@ import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { countSquareBrackets } from "../utlis";
+import { InputFields, ItemType, ParamType } from "../types";
 import * as yup from "yup";
 import {
     Box,
@@ -15,28 +16,12 @@ import {
     DialogActions,
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
-import { itemsEqual } from "@dnd-kit/sortable/dist/utilities";
 type Props = {
     item: ItemType | undefined | null;
     onCloseHanlder: () => void;
     onSubmitHanlder: (item: ItemType, paramsArray: ParamType[]) => void;
     open: boolean;
     isEditing?: boolean;
-};
-
-type ParamType = {
-    param: number;
-    order: number;
-};
-
-type ItemType = {
-    text: string;
-    code: string;
-    params?: ParamType[];
-};
-
-type InputFields = {
-    [key: string]: number;
 };
 
 const FormComponent: React.FC<Props> = ({
@@ -60,6 +45,7 @@ const FormComponent: React.FC<Props> = ({
         Inputs.reduce((acc, inputName) => {
             acc[inputName] = yup
                 .number()
+                .positive()
                 .required(`${inputName} is required`)
                 .typeError(`${inputName} must be a number`);
             return acc;
@@ -141,7 +127,7 @@ const FormComponent: React.FC<Props> = ({
                     sx={{
                         display: "flex",
                         justifyContent: "space-between",
-                        px: 3,
+                        mx: 3.5,
                         my: 2,
                     }}
                 >
@@ -153,7 +139,7 @@ const FormComponent: React.FC<Props> = ({
                         {isEditing ? "Edit" : "Submit"}
                     </Button>
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         type="button"
                         onClick={onCloseHanlder}
                     >
