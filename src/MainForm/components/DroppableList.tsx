@@ -12,7 +12,10 @@ const DroppableList: React.FC<Props> = ({ id, children }) => {
     });
 
     return (
-        <Box sx={{ minHeight: "400px", display:'flex' }} ref={setNodeRef}>
+        <Box
+            sx={{ minHeight: "400px", display: "flex", minWidth: "300px" }}
+            ref={setNodeRef}
+        >
             {children}
         </Box>
     );

@@ -27,9 +27,12 @@ export type ItemType = {
 export type FormInputType = {
     title: string;
     description: string;
-    consumer: ItemType[];
+    leftList: ItemType[];
+    rightList: ItemType[];
 };
 
 export type InputFields = {
     [key: string]: number;
 };
+
+export type ListType = "leftList" | "rightList";
