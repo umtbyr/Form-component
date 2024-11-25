@@ -11,6 +11,7 @@ import { ItemType, ParamType } from "../../features/types";
 import { useFormContext } from "react-hook-form";
 import { useState } from "react";
 import { SortableItem } from "./components/sortable-item";
+import { arrayMove } from "@dnd-kit/sortable";
 
 //dialog burda olabilir
 //sürükle bırak contexti burda olmalı
@@ -27,10 +28,9 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [activeItem, setActiveItem] = useState<ItemType | null>();
     const { getValues, setValue } = useFormContext();
-    const rules = getValues(name) || [];
+    const rules: ItemType[] = getValues(name) || [];
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event;
-        console.log("active", active);
         const activeDraggedItem =
             rules.find((item: ItemType) => item.code === active.id) ||
             data.find((item) => item.code === active.id);
@@ -39,15 +39,35 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
+        console.log("over :", over?.id);
 
-        if (over?.id === "rulesListRight") {
+        if (!over?.id) {
+            setActiveItem(null);
+            return null;
+        }
+
+        if (
+            rules.some((item) => item.code === over.id) &&
+            rules.some((item) => item.code === active.id)
+        ) {
+            const oldIndex = rules.findIndex((item) => item.code === active.id);
+            const newIndex = rules.findIndex((item) => item.code === over.id);
+            const updatedRules = arrayMove(rules, oldIndex, newIndex);
+            setValue(name, updatedRules);
+            setActiveItem(null);
+        } else if (
+            over?.id === "rulesListRight" &&
+            !rules.some((item) => item.code === active.id)
+        ) {
+            //adding item from left to right...
             setFormIsOpen(true);
         } else if (
             over?.id === "rulesListLeft" &&
             !data.some((item) => item.code === active.id)
         ) {
+            //adding item from right to left...
             rules.splice(
-                rules.findIndex((item: ItemType) => item.code === active.id),
+                rules.findIndex((item) => item.code === active.id),
                 1
             );
             setData((prevData) => {
@@ -57,6 +77,9 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
                 return [updatedActiveData, ...prevData];
             });
             setActiveItem(null);
+        } else {
+            setActiveItem(null);
+            //logic for sorting in the left list will add if needed.
         }
     };
 
