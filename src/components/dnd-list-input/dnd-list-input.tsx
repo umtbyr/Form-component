@@ -1,12 +1,16 @@
 import { Box } from "@mui/material";
-
 import { DroppableContainer } from "./components";
 import { DialogComponent } from "./components";
-import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
-
+import {
+    DndContext,
+    DragEndEvent,
+    DragOverlay,
+    DragStartEvent,
+} from "@dnd-kit/core";
 import { ItemType, ParamType } from "../../features/types";
 import { useFormContext } from "react-hook-form";
 import { useState } from "react";
+import { SortableItem } from "./components/sortable-item";
 
 //dialog burda olabilir
 //sürükle bırak contexti burda olmalı
@@ -27,12 +31,14 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event;
         console.log("active", active);
+        const activeDraggedItem =
+            rules.find((item: ItemType) => item.code === active.id) ||
+            data.find((item) => item.code === active.id);
+        setActiveItem(activeDraggedItem);
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-
-        setActiveItem(active.data.current as ItemType);
 
         if (over?.id === "rulesListRight") {
             setFormIsOpen(true);
@@ -50,6 +56,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
 
                 return [updatedActiveData, ...prevData];
             });
+            setActiveItem(null);
         }
     };
 
@@ -95,14 +102,29 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
                     >
                         <Box>
                             <DroppableContainer
+                                activeItem={activeItem}
                                 items={data}
                                 id="rulesListLeft"
                             />
                         </Box>
                     </div>
                     <div style={{ display: "flex", gap: "20px" }}>
-                        <DroppableContainer items={rules} id="rulesListRight" />
+                        <DroppableContainer
+                            activeItem={activeItem}
+                            items={rules}
+                            id="rulesListRight"
+                        />
                     </div>
+                    <DragOverlay>
+                        {activeItem?.code ? (
+                            <SortableItem
+                                id={activeItem.code}
+                                data={items.find(
+                                    (item) => item.code === activeItem.code
+                                )}
+                            />
+                        ) : null}
+                    </DragOverlay>
                 </div>
             </DndContext>
             {formIsOpen && (

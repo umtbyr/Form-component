@@ -5,14 +5,17 @@ import {
 } from "@dnd-kit/sortable";
 import { ItemType } from "../../../../features/types";
 import { DraggableItem } from "../draggable-item";
+import { SortableItem } from "../sortable-item";
 
 interface DroppableContainerProps {
     id: string;
     items: ItemType[];
+    activeItem: ItemType | null | undefined;
 }
 export const DroppableContainer: React.FC<DroppableContainerProps> = ({
     id,
     items,
+    activeItem,
 }) => {
     const { setNodeRef, isOver } = useDroppable({ id });
 
@@ -32,7 +35,12 @@ export const DroppableContainer: React.FC<DroppableContainerProps> = ({
                 strategy={verticalListSortingStrategy}
             >
                 {items?.map((item) => (
-                    <DraggableItem key={item.code} data={item} id={item.code} />
+                    <SortableItem
+                        key={item.code}
+                        data={item}
+                        id={item.code}
+                        hidden={activeItem?.code === item.code}
+                    />
                 ))}
             </SortableContext>
         </div>
