@@ -1,8 +1,8 @@
 import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { countSquareBrackets } from "../utlis";
-import { InputFields, ItemType, ParamType } from "../types";
+import { countSquareBrackets } from "../../utils/utils";
+import { InputFields, ItemType, ParamType } from "../../../../features/types";
 import * as yup from "yup";
 import {
     Box,
@@ -19,15 +19,15 @@ import { Close } from "@mui/icons-material";
 type Props = {
     item: ItemType | undefined | null;
     onCloseHanlder: () => void;
-    onSubmitOrEditHanlder: (item: ItemType, paramsArray: ParamType[]) => void;
+    OnSubmitHandler: (item: ItemType, paramsArray: ParamType[]) => void;
     open: boolean;
     isEditing?: boolean;
 };
 
-const DialogComponent: React.FC<Props> = ({
+export const DialogComponent: React.FC<Props> = ({
     item,
     onCloseHanlder,
-    onSubmitOrEditHanlder,
+    OnSubmitHandler,
     open,
     isEditing,
 }) => {
@@ -74,7 +74,7 @@ const DialogComponent: React.FC<Props> = ({
             } as ParamType;
         });
 
-        onSubmitOrEditHanlder(item, paramsArray.reverse());
+        OnSubmitHandler(item, paramsArray.reverse());
         onCloseHanlder();
     };
 
@@ -156,5 +156,3 @@ const DialogComponent: React.FC<Props> = ({
         </>
     );
 };
-
-export default DialogComponent;

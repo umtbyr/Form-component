@@ -27,8 +27,7 @@ export type ItemType = {
 export type FormInputType = {
     title: string;
     description: string;
-    leftList: ItemType[];
-    rightList: ItemType[];
+    rules: ItemType[];
 };
 
 export type InputFields = {

@@ -1,97 +1,119 @@
 import { Box } from "@mui/material";
-import * as React from "react";
-import { LeftContainer } from "./components";
-import { RightContainer } from "./components";
-import {
-    closestCenter,
-    DndContext,
-    DragEndEvent,
-    MouseSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
-} from "@dnd-kit/core";
-import { UseFieldArrayReturn } from "react-hook-form";
-import { FormInputType } from "../../MainForm/types";
-import DroppableList from "../../MainForm/components/DroppableList";
-import {
-    SortableContext,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+
+import { DroppableContainer } from "./components";
+import { DialogComponent } from "./components";
+import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+
+import { ItemType, ParamType } from "../../features/types";
+import { useFormContext } from "react-hook-form";
+import { useState } from "react";
+
 //dialog burda olabilir
 //sürükle bırak contexti burda olmalı
 //dialogdan gelen data ilgili alana hook forma setvalue eklersin.
 
 type DndListInputProps = {
-    leftList: UseFieldArrayReturn<FormInputType, "leftList">;
-    rightList: UseFieldArrayReturn<FormInputType, "rightList">;
+    items: ItemType[];
+    name: string;
 };
 
-export const DndListInput: React.FC<DndListInputProps> = ({
-    leftList,
-    rightList,
-}) => {
-    const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
+export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
+    const [data, setData] = useState(items);
+    const [formIsOpen, setFormIsOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [activeItem, setActiveItem] = useState<ItemType | null>();
+    const { getValues, setValue } = useFormContext();
+    const rules = getValues(name) || [];
+    const handleDragStart = (event: DragStartEvent) => {
+        const { active } = event;
+        console.log("active", active);
+    };
 
-    
-    const onDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
-        if (!over) return;
+        setActiveItem(active.data.current as ItemType);
 
-        const draggedItem =
-            leftList.fields.find((item) => item.code === active.id) ||
-            rightList.fields.find((item) => item.code === active.id);
-
-        if (!draggedItem) return;
-
-        if (leftList.fields.some((item) => item.code === active.id)) {
-            leftList.remove(
-                leftList.fields.findIndex((item) => item.code === active.id)
+        if (over?.id === "rulesListRight") {
+            setFormIsOpen(true);
+        } else if (
+            over?.id === "rulesListLeft" &&
+            !data.some((item) => item.code === active.id)
+        ) {
+            rules.splice(
+                rules.findIndex((item: ItemType) => item.code === active.id),
+                1
             );
-        } else if (rightList.fields.some((item) => item.code === active.id)) {
-            rightList.remove(
-                rightList.fields.findIndex((item) => item.code === active.id)
-            );
+            setData((prevData) => {
+                const updatedActiveData = active.data.current as ItemType;
+                updatedActiveData.params = undefined;
+
+                return [updatedActiveData, ...prevData];
+            });
         }
-
-        /*       if (over.id === "left") {
-            if (!leftList.fields.some((item) => item.code === active.id)) {
-                leftList.append({ ...draggedItem });
-            }
-        } else if (over.id === "right") {
-            if (!rightList.fields.some((item) => item.code === active.id)) {
-                rightList.append({ ...draggedItem });
-            }
-        } */
     };
+
+    const OnSubmitHandler = (
+        activeItem: ItemType,
+        paramsArray: ParamType[]
+    ) => {
+        setActiveItem((prevItem) => {
+            if (!prevItem) return null;
+
+            const updatedActiveItem = {
+                ...prevItem,
+                params: paramsArray as ParamType[],
+            };
+
+            rules.push(updatedActiveItem);
+            setValue(name, rules);
+            const updatedData = data.filter(
+                (item) => item.code !== activeItem.code
+            );
+            setData(updatedData);
+        });
+    };
+
+    const onCloseFormHandler = () => {
+        setActiveItem(null);
+        setFormIsOpen(false);
+        if (isEditing) {
+            setIsEditing(false);
+        }
+    };
+
     return (
-        <Box
-            sx={{
-                width: "100%",
-                border: "dashed 1px #999",
-                p: 2,
-                display: "flex",
-            }}
-        >
-            <DndContext onDragEnd={onDragEnd} sensors={sensors}>
-                <DroppableList id="left">
-                    <SortableContext
-                        strategy={verticalListSortingStrategy}
-                        items={leftList.fields.map((item) => item.code)}
+        <>
+            <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+                <div style={{ display: "flex", gap: "20px" }}>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "20px",
+                        }}
                     >
-                        <LeftContainer name="leftList" />
-                    </SortableContext>
-                </DroppableList>
-                <SortableContext
-                    strategy={verticalListSortingStrategy}
-                    items={rightList.fields.map((item) => item.code)}
-                >
-                    <DroppableList id="right">
-                        <RightContainer name="rightList" />
-                    </DroppableList>
-                </SortableContext>
+                        <Box>
+                            <DroppableContainer
+                                items={data}
+                                id="rulesListLeft"
+                            />
+                        </Box>
+                    </div>
+                    <div style={{ display: "flex", gap: "20px" }}>
+                        <DroppableContainer items={rules} id="rulesListRight" />
+                    </div>
+                </div>
             </DndContext>
-        </Box>
+            {formIsOpen && (
+                <DialogComponent
+                    isEditing={isEditing}
+                    open={formIsOpen}
+                    OnSubmitHandler={OnSubmitHandler}
+                    onCloseHanlder={onCloseFormHandler}
+                    item={activeItem}
+                ></DialogComponent>
+            )}
+        </>
     );
 };

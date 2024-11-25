@@ -4,7 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Box, Typography, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { ItemType } from "../../../../MainForm/types";
+import { ItemType } from "../../../../features/types";
 type ListItemProps = {
     text: string;
     code: string;
@@ -46,15 +46,14 @@ export const ListItem: React.FC<ListItemProps> = ({ text, code }) => {
     );
 };
 
-{
-    /*             <IconButton
-    onClick={() => {
-        onDelete(id);
-    }}
->
-    <DeleteIcon sx={{ color: "red" }} />
-</IconButton>
-<IconButton onClick={() => onEdit(id)}>
-    <SettingsIcon />
-</IconButton> */
-}
+type ListItem2Props = {
+    data: ItemType;
+};
+
+export const ListItem2: React.FC<ListItem2Props> = ({ data }) => {
+    return (
+        <Typography component="p" sx={{ flex: 1, border: "solid 1px red" }}>
+            {data.text}
+        </Typography>
+    );
+};
