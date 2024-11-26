@@ -1,4 +1,4 @@
-import { Button, TextField, TextFieldProps } from "@mui/material";
+import { TextField, TextFieldProps } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 
 type CustomTextFieldProps = TextFieldProps & {
@@ -16,7 +16,9 @@ export const TextInput: React.FC<CustomTextFieldProps> = ({
             name={name}
             control={control}
             render={({ field }) => {
-                return <TextField {...field} {...rest} />;
+                return (
+                    <TextField {...field} {...rest} value={field.value || ""} />
+                );
             }}
         />
     );
