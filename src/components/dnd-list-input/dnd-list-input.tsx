@@ -29,7 +29,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
     const [activeItem, setActiveItem] = useState<ItemType | null>();
     const { getValues, setValue } = useFormContext();
     const rules: ItemType[] = getValues(name) || [];
-    
+
     const handleDragStart = (event: DragStartEvent) => {
         const { active } = event;
         const activeDraggedItem =
@@ -71,6 +71,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
                 rules.findIndex((item) => item.code === active.id),
                 1
             );
+            setValue(name, rules);
             setData((prevData) => {
                 const updatedActiveData = active.data.current as ItemType;
                 updatedActiveData.params = undefined;

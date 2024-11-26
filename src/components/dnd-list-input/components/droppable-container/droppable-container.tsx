@@ -4,7 +4,6 @@ import {
     verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { ItemType } from "../../../../features/types";
-import { DraggableItem } from "../draggable-item";
 import { SortableItem } from "../sortable-item";
 
 interface DroppableContainerProps {
