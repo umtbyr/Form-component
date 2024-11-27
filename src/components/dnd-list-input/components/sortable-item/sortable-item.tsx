@@ -10,12 +10,16 @@ interface SortableItemProps {
     data: ItemType | undefined;
     hidden?: boolean;
     isIconsHidden?: boolean;
+    onSettings?: (id: string) => void;
+    onDelete?: (id: string) => void;
 }
 export const SortableItem: React.FC<SortableItemProps> = ({
     id,
     data,
     hidden,
     isIconsHidden,
+    onSettings,
+    onDelete,
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({
@@ -39,13 +43,13 @@ export const SortableItem: React.FC<SortableItemProps> = ({
             {isIconsHidden && (
                 <>
                     <IconButton
-                        onClick={() => console.log("delete")}
+                        onClick={() => onDelete?.(id)}
                         onPointerDown={(e) => e.stopPropagation()}
                     >
                         <DeleteOutlineOutlinedIcon></DeleteOutlineOutlinedIcon>
                     </IconButton>
                     <IconButton
-                        onClick={() => console.log("settings")}
+                        onClick={() => onSettings?.(id)}
                         onPointerDown={(e) => e.stopPropagation()}
                     >
                         <SettingsOutlinedIcon></SettingsOutlinedIcon>

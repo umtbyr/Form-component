@@ -10,11 +10,15 @@ interface DroppableContainerProps {
     id: string;
     items: ItemType[];
     activeItem: ItemType | null | undefined;
+    onSettings?: (id: string) => void;
+    onDelete?: (id: string) => void;
 }
 export const DroppableContainer: React.FC<DroppableContainerProps> = ({
     id,
     items,
     activeItem,
+    onSettings,
+    onDelete,
 }) => {
     const { setNodeRef, isOver } = useDroppable({ id });
 
@@ -35,6 +39,8 @@ export const DroppableContainer: React.FC<DroppableContainerProps> = ({
             >
                 {items?.map((item) => (
                     <SortableItem
+                        onDelete={onDelete}
+                        onSettings={onSettings}
                         key={item.code}
                         data={item}
                         id={item.code}

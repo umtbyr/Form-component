@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, ListItemIcon } from "@mui/material";
 import { DroppableContainer } from "./components";
 import { InputDialog } from "./components";
 import {
@@ -45,7 +45,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
             setActiveItem(null);
             return null;
         }
-    
+
         if (
             rules.some((item) => item.code === over.id) &&
             rules.some((item) => item.code === active.id)
@@ -85,7 +85,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
         }
     };
 
-    const onSubmitInputHandler = (
+    const onSubmitInputFormHandler = (
         activeItem: ItemType,
         paramsArray: ParamType[]
     ) => {
@@ -97,8 +97,19 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
                 params: paramsArray,
             };
 
-            rules.push(updatedActiveItem);
-            setValue(name, rules);
+            const isEditing = rules.find(
+                (item) => item.code === activeItem.code
+            );
+            if (isEditing) {
+                const updatedRules = rules.filter(
+                    (item) => item.code !== activeItem.code
+                );
+                updatedRules.push(updatedActiveItem);
+                setValue(name, updatedRules);
+            } else {
+                rules.push(updatedActiveItem);
+                setValue(name, rules);
+            }
             const updatedData = data.filter(
                 (item) => item.code !== activeItem.code
             );
@@ -109,6 +120,25 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
     const onCloseInputFormHandler = () => {
         setActiveItem(null);
         setFormIsOpen(false);
+    };
+    //prop drilling-?
+    const onDelete = (id: string) => {
+        const itemToMove = rules.find((item) => item.code === id);
+        if (!itemToMove) {
+            return;
+        }
+        const updatedRules = rules.filter((item) => item.code !== id);
+        setValue(name, updatedRules);
+        setData((prev) => {
+            return [itemToMove, ...prev];
+        });
+    };
+    const onSettings = (id: string) => {
+        const itemToSet =
+            rules.find((item: ItemType) => item.code === id) ||
+            data.find((item) => item.code === id);
+        setActiveItem(itemToSet);
+        setFormIsOpen(true);
     };
 
     return (
@@ -132,6 +162,8 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
                     </div>
                     <div style={{ display: "flex", gap: "20px" }}>
                         <DroppableContainer
+                            onDelete={onDelete}
+                            onSettings={onSettings}
                             activeItem={activeItem}
                             items={rules}
                             id="rulesListRight"
@@ -152,7 +184,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
             {formIsOpen && (
                 <InputDialog
                     open={formIsOpen}
-                    OnSubmitHandler={onSubmitInputHandler}
+                    OnSubmitHandler={onSubmitInputFormHandler}
                     onCloseHanlder={onCloseInputFormHandler}
                     item={activeItem}
                 ></InputDialog>
