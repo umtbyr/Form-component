@@ -39,6 +39,7 @@ export const DroppableContainer: React.FC<DroppableContainerProps> = ({
                         data={item}
                         id={item.code}
                         hidden={activeItem?.code === item.code}
+                        isIconsHidden={id === "rulesListRight"}
                     />
                 ))}
             </SortableContext>

@@ -2,15 +2,20 @@ import React, { CSSProperties } from "react";
 import { ItemType } from "../../../../features/types";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import { Box, IconButton, Typography } from "@mui/material";
 interface SortableItemProps {
     id: string;
     data: ItemType | undefined;
     hidden?: boolean;
+    isIconsHidden?: boolean;
 }
 export const SortableItem: React.FC<SortableItemProps> = ({
     id,
     data,
     hidden,
+    isIconsHidden,
 }) => {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({
@@ -26,10 +31,27 @@ export const SortableItem: React.FC<SortableItemProps> = ({
         marginBottom: "8px",
         backgroundColor: "white",
         cursor: "grab",
+        display: "flex",
     };
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-            {data?.text}
-        </div>
+        <Box ref={setNodeRef} style={style} {...listeners} {...attributes}>
+            <Typography>{data?.text}</Typography>
+            {isIconsHidden && (
+                <>
+                    <IconButton
+                        onClick={() => console.log("delete")}
+                        onPointerDown={(e) => e.stopPropagation()}
+                    >
+                        <DeleteOutlineOutlinedIcon></DeleteOutlineOutlinedIcon>
+                    </IconButton>
+                    <IconButton
+                        onClick={() => console.log("settings")}
+                        onPointerDown={(e) => e.stopPropagation()}
+                    >
+                        <SettingsOutlinedIcon></SettingsOutlinedIcon>
+                    </IconButton>
+                </>
+            )}
+        </Box>
     );
 };

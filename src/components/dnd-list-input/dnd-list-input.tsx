@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { DroppableContainer } from "./components";
-import { DialogComponent } from "./components";
+import { InputDialog } from "./components";
 import {
     DndContext,
     DragEndEvent,
@@ -25,7 +25,6 @@ type DndListInputProps = {
 export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
     const [data, setData] = useState(items);
     const [formIsOpen, setFormIsOpen] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
     const [activeItem, setActiveItem] = useState<ItemType | null>();
     const { getValues, setValue } = useFormContext();
     const rules: ItemType[] = getValues(name) || [];
@@ -109,9 +108,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
     const onCloseFormHandler = () => {
         setActiveItem(null);
         setFormIsOpen(false);
-        if (isEditing) {
-            setIsEditing(false);
-        }
+
     };
 
     return (
@@ -153,13 +150,12 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
                 </div>
             </DndContext>
             {formIsOpen && (
-                <DialogComponent
-                    isEditing={isEditing}
+                <InputDialog
                     open={formIsOpen}
                     OnSubmitHandler={OnSubmitHandler}
                     onCloseHanlder={onCloseFormHandler}
                     item={activeItem}
-                ></DialogComponent>
+                ></InputDialog>
             )}
         </>
     );
