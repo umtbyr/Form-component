@@ -45,11 +45,12 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
             setActiveItem(null);
             return null;
         }
-
+    
         if (
             rules.some((item) => item.code === over.id) &&
             rules.some((item) => item.code === active.id)
         ) {
+            //sorting right list.
             const oldIndex = rules.findIndex((item) => item.code === active.id);
             const newIndex = rules.findIndex((item) => item.code === over.id);
             const updatedRules = arrayMove(rules, oldIndex, newIndex);
@@ -66,11 +67,11 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
             !data.some((item) => item.code === active.id)
         ) {
             //adding item from right to left...
-            rules.splice(
-                rules.findIndex((item) => item.code === active.id),
-                1
+            const updatedRules = rules.filter(
+                (item) => item.code !== active.id
             );
-            setValue(name, rules);
+
+            setValue(name, updatedRules);
             setData((prevData) => {
                 const updatedActiveData = active.data.current as ItemType;
                 updatedActiveData.params = undefined;
@@ -80,11 +81,11 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
             setActiveItem(null);
         } else {
             setActiveItem(null);
-            //logic for sorting in the left list will add if needed.
+            //logic for sorting in the left list can add if needed.
         }
     };
 
-    const OnSubmitHandler = (
+    const onSubmitInputHandler = (
         activeItem: ItemType,
         paramsArray: ParamType[]
     ) => {
@@ -93,7 +94,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
 
             const updatedActiveItem = {
                 ...prevItem,
-                params: paramsArray as ParamType[],
+                params: paramsArray,
             };
 
             rules.push(updatedActiveItem);
@@ -105,10 +106,9 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
         });
     };
 
-    const onCloseFormHandler = () => {
+    const onCloseInputFormHandler = () => {
         setActiveItem(null);
         setFormIsOpen(false);
-
     };
 
     return (
@@ -152,8 +152,8 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
             {formIsOpen && (
                 <InputDialog
                     open={formIsOpen}
-                    OnSubmitHandler={OnSubmitHandler}
-                    onCloseHanlder={onCloseFormHandler}
+                    OnSubmitHandler={onSubmitInputHandler}
+                    onCloseHanlder={onCloseInputFormHandler}
                     item={activeItem}
                 ></InputDialog>
             )}

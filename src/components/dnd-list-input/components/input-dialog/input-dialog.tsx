@@ -62,8 +62,6 @@ export const InputDialog: React.FC<Props> = ({
     });
 
     const onSubmit: SubmitHandler<InputFields> = (inputs) => {
-        //create the paramsArray from the given form data. Object.values return an array form given object. then we map over that array and create
-        //param object and put them in an array.
         const paramsArray = Object.values(inputs).map((input, index) => {
             return {
                 param: input,
@@ -99,7 +97,6 @@ export const InputDialog: React.FC<Props> = ({
                             alignItems: "center",
                         }}
                         component="form"
-                        onSubmit={handleSubmit(onSubmit)}
                     >
                         <Typography
                             component="p"
