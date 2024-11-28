@@ -128,6 +128,7 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
         if (!itemToMove) {
             return;
         }
+        itemToMove.params = undefined;
         const updatedRules = rules.filter((item) => item.code !== id);
         setValue(name, updatedRules);
         setData((prev) => {
