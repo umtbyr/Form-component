@@ -76,7 +76,9 @@ export const InputDialog: React.FC<Props> = ({
     return (
         <>
             <Dialog open={open}>
-                <DialogTitle sx={{ m: 0, p: 2 }}>Edit Rule</DialogTitle>
+                <DialogTitle sx={{ m: 0, p: 2, textAlign: "center" }}>
+                    {isEditing ? "Edit Rule" : "Create Rule"}
+                </DialogTitle>
                 <IconButton
                     onClick={onCloseHanlder}
                     aria-label="close"
@@ -107,15 +109,12 @@ export const InputDialog: React.FC<Props> = ({
                         <Box sx={{ display: "flex", gap: 3 }}>
                             {Inputs.map((name, index) => (
                                 <TextField
+                                    defaultValue={item.params?.[index]?.param}
                                     key={name}
                                     fullWidth
                                     {...register(name)}
                                     type="number"
-                                    placeholder={
-                                        item.params?.[
-                                            index
-                                        ]?.param?.toString() || name
-                                    }
+                                    placeholder={name}
                                     error={!!errors[name]}
                                     helperText={errors[name]?.message}
                                 ></TextField>

@@ -9,15 +9,24 @@ export const TextInput: React.FC<CustomTextFieldProps> = ({
     name,
     ...rest
 }) => {
-    const { control } = useFormContext();
+    const {
+        control,
+        formState: { errors },
+    } = useFormContext();
 
     return (
         <Controller
             name={name}
             control={control}
             render={({ field }) => {
+                const errorMessage = errors[name]?.message;
                 return (
-                    <TextField {...field} {...rest} value={field.value || ""} />
+                    <TextField
+                        error={!!errorMessage}
+                        {...field}
+                        {...rest}
+                        value={field.value || ""}
+                    />
                 );
             }}
         />

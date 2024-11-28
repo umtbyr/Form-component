@@ -42,10 +42,15 @@ export const SampleForm: React.FC<SampleFormProps> = () => {
                 >
                     <Grid2 container direction="column" spacing={2}>
                         <Grid2>
-                            <TextInput name="title" />
+                            <TextInput name="title" label="title" />
                         </Grid2>
                         <Grid2>
-                            <TextInput name="description" multiline rows={4} />
+                            <TextInput
+                                name="description"
+                                multiline
+                                rows={4}
+                                label="description"
+                            />
                         </Grid2>
                         <Grid2>
                             <DndListInput items={RULES} name="rules" />
