@@ -5,6 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { Box, IconButton, Typography } from "@mui/material";
+import { replaceSquareBrackets } from "./utils/utils";
 interface SortableItemProps {
     id: string;
     data: ItemType | undefined;
@@ -41,9 +42,11 @@ export const SortableItem: React.FC<SortableItemProps> = ({
         display: "flex",
     };
 
+    const editedText = replaceSquareBrackets(data?.text, data?.params);
+
     return (
         <Box ref={setNodeRef} style={style} {...listeners} {...attributes}>
-            <Typography sx={{ flex: 1 }}>{data?.text}</Typography>
+            <Typography sx={{ flex: 1 }}>{editedText}</Typography>
 
             <Box
                 sx={{

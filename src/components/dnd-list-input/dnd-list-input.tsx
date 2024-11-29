@@ -40,8 +40,6 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        console.log("over :", over?.id);
-
         if (!over?.id) {
             setActiveItem(null);
             return null;
@@ -98,11 +96,13 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
                 params: paramsArray,
             };
             if (isEditing) {
-                //degistir
+                const index = rules.findIndex(
+                    (item) => item.code === activeItem.code
+                );
                 const updatedRules = rules.filter(
                     (item) => item.code !== activeItem.code
                 );
-                updatedRules.push(updatedActiveItem);
+                updatedRules.splice(index, 0, updatedActiveItem);
                 setValue(name, updatedRules);
             } else {
                 rules.push(updatedActiveItem);
@@ -176,9 +176,14 @@ export const DndListInput: React.FC<DndListInputProps> = ({ items, name }) => {
                         {activeItem?.code ? (
                             <SortableItem
                                 id={activeItem.code}
-                                data={items.find(
-                                    (item) => item.code === activeItem.code
-                                )}
+                                data={
+                                    rules.find(
+                                        (item) => item.code === activeItem.code
+                                    ) ||
+                                    items.find(
+                                        (item) => item.code === activeItem.code
+                                    )
+                                }
                             />
                         ) : null}
                     </DragOverlay>
